@@ -42,7 +42,7 @@ def main(raw_arguments: list) -> None:
                         f"{vacancies_query.BASE_URL}{raw_vacancy_short['id']}"
                     ).text
                 )
-                if "id" in raw_vacancy_full:
+                if "id" in raw_vacancy_full: # TODO: fix captcha
                     vacancies_list.append(Vacancy.data_to_vacancy(raw_vacancy_full))
 
     vacancies: Vacancies = Vacancies(vacancies_list)

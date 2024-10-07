@@ -57,6 +57,7 @@ class Vacancy:
     schedule: str
     experience: str
     employment: str
+    skills: list[str]
 
     @classmethod
     def data_to_vacancy(cls, data: any) -> "Vacancy":
@@ -93,6 +94,7 @@ class Vacancy:
             schedule=data["schedule"]["name"],
             experience=data["experience"]["name"],
             employment=data["employment"]["name"],
+            skills=[it["name"] for it in data["key_skills"]] if data["key_skills"] else [None],
         )
 
     def to_list(self) -> list:
@@ -116,6 +118,7 @@ class Vacancy:
             self.schedule,
             self.experience,
             self.employment,
+            *self.skills,
         ]
 
 
@@ -145,6 +148,7 @@ class Vacancies:
                 "Schedule",
                 "Experience",
                 "Employment",
+                "Skills"
             ]
         ]
         for vacancy in self.vacancies:

@@ -1,10 +1,16 @@
 import argparse
+import re
 from dataclasses import dataclass
 from urllib.parse import urlencode
 
 import requests
+from bs4 import BeautifulSoup, ResultSet
 
 from query import Query
+
+RE_COMPILED: re.Pattern[str] = re.compile(r"resume\/(.+)\?")
+
+RESUME_URL: str = "https://hh.ru/resume/"
 
 REQUEST_HEADERS: dict[str, str] = {
     "User-Agent":
@@ -54,4 +60,9 @@ def tool_entrypoint(args: argparse.Namespace) -> None:
     for page_num in range(1, 51):
         query_url: str = resumes_query.get_url(page_num)
         page_data: str = requests.get(query_url, headers=REQUEST_HEADERS).text
-        print(page_data)
+        soup: BeautifulSoup = BeautifulSoup(page_data, features="lxml", from_encoding="utf-8")
+        tags_with_link: ResultSet = soup.find_all("a", {"data-qa": "serp-item__title"})
+        for tag in tags_with_link:
+            resume_id: str = RE_COMPILED.search(tag["href"]).group(1).strip()
+            resume_url: str = f"{RESUME_URL}{resume_id}"
+            resume_page_data: str = requests.get(resume_url, headers=REQUEST_HEADERS).text

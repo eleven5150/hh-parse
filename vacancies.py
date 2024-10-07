@@ -8,6 +8,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from urllib.parse import urlencode
 
+from query import Query
+
+
 def vacancies_subparser(subparser):
     parser = subparser.add_parser("vacancies_tool", description="Tool for parsing vacancies")
     parser.add_argument("-s", "--search_query",
@@ -28,30 +31,11 @@ def vacancies_subparser(subparser):
 
 
 @dataclass
-class VacanciesQuery:
-    search: str
-    areas: list[int]
-    roles: list[int]
-
+class VacanciesQuery(Query):
     BASE_URL: str = "https://api.hh.ru/vacancies/"
 
-    @classmethod
-    def args_to_vacancy_query(cls, args: argparse.Namespace) -> "VacanciesQuery":
-        roles: list[int] = list()
-        if args.roles:
-            roles = [int(it, 10) for it in args.roles]
-
-        return cls(
-            search=args.search_query,
-            areas=[int(it, 10) for it in args.areas],
-            roles=roles
-        )
-
     def get_url(self) -> str:
-        vacancy_query_dict: dict[any, any] = dict()
-        vacancy_query_dict.update({"text": self.search})
-        vacancy_query_dict.update({"area": self.areas})
-        vacancy_query_dict.update({"roles": self.roles})
+        vacancy_query_dict: dict[any, any] = super().get_query()
         vacancy_query_dict.update({"per_page": 100})
         return f"{self.BASE_URL}?{urlencode(vacancy_query_dict, doseq=True)}"
 

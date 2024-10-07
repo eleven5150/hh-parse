@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from resumes import resumes_subparser
 from vacancies import vacancies_subparser
 
 
@@ -15,6 +16,7 @@ def parse_args(arguments: list):
     )
 
     vacancies_subparser(subparsers)
+    resumes_subparser(subparsers)
 
     return parser.parse_args(arguments)
 

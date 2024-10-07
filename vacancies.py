@@ -36,6 +36,7 @@ class VacanciesQuery(Query):
 
     def get_url(self) -> str:
         vacancy_query_dict: dict[any, any] = super().get_query()
+        vacancy_query_dict.update({"text": ""})
         vacancy_query_dict.update({"per_page": 100})
         return f"{self.BASE_URL}?{urlencode(vacancy_query_dict, doseq=True)}"
 
@@ -163,7 +164,7 @@ class Vacancies:
             table[0].append(f"Skill {it + 1}")
 
         with open(
-                f"export_{vacancies_query.search}_{vacancies_query.areas}_{vacancies_query.roles}.csv",
+                f"export_vacancies_{vacancies_query.areas}_{vacancies_query.roles}.csv",
                 "w",
                 encoding="utf-8",
                 newline=""

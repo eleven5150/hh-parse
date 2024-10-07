@@ -4,7 +4,6 @@ from urllib.parse import urlencode
 
 @dataclass
 class Query:
-    search: str
     areas: list[int]
     roles: list[int]
 
@@ -15,14 +14,12 @@ class Query:
             roles = [int(it, 10) for it in args.roles]
 
         return cls(
-            search=args.search_query,
             areas=[int(it, 10) for it in args.areas],
             roles=roles
         )
 
     def get_query(self) -> dict[any, any]:
         query_dict: dict[any, any] = dict()
-        query_dict.update({"text": self.search})
         query_dict.update({"area": self.areas})
         query_dict.update({"roles": self.roles})
         return query_dict

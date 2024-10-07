@@ -136,7 +136,7 @@ class Resumes:
             table[0].append(f"Skill {it + 1}")
 
         with open(
-                f"export_{resumes_query.search}_{resumes_query.areas}_{resumes_query.roles}.csv",
+                f"export_resumes_{resumes_query.areas}_{resumes_query.roles}.csv",
                 "w",
                 encoding="utf-8",
                 newline=""

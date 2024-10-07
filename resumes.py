@@ -52,7 +52,9 @@ class Resume:
     @classmethod
     def html_to_resume(cls, resume_id: str, resume_page_soup: BeautifulSoup) -> "Resume":
         tags_with_title: ResultSet = resume_page_soup.find_all("span", {"data-qa": "resume-block-title-position"})
-        title: str = tags_with_title[0].get_text()
+        title: str = "Unknown"
+        if len(tags_with_title) > 0:
+            title = tags_with_title[0].get_text()
         tags_with_area: ResultSet = resume_page_soup.find_all("span", {"data-qa": "resume-personal-address"})
         area: str = tags_with_area[0].get_text()
         tags_with_age: ResultSet = resume_page_soup.find_all("span", {"data-qa": "resume-personal-age"})

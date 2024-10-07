@@ -147,10 +147,10 @@ class Resumes:
 
 def resumes_subparser(subparser):
     parser = subparser.add_parser("resumes_tool", description="Tool for parsing resumes")
-    parser.add_argument("-s", "--search_query",
-                        type=str,
+    parser.add_argument("-n", "--num_of_pages",
+                        type=int,
                         required=True,
-                        help="Search query")
+                        help="Num of pages to parse")
     parser.add_argument("-a", "--areas",
                         type=str,
                         required=True,
@@ -167,7 +167,7 @@ def resumes_subparser(subparser):
 def tool_entrypoint(args: argparse.Namespace) -> None:
     resumes_query: ResumesQuery = ResumesQuery.args_to_vacancy_query(args)
     resumes_list: list[Resume] = list()
-    for page_num in range(0, 3):
+    for page_num in range(0, args.num_of_pages):
         query_url: str = resumes_query.get_url(page_num)
         print(query_url)
         resumes_page_data: str = requests.get(query_url, headers=REQUEST_HEADERS).text

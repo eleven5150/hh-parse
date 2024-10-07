@@ -54,10 +54,9 @@ class Vacancy:
     url: str
     employer_name: str
     is_accredited_it_employer: bool | None
-    # schedule: str
+    schedule: str
     experience: str
-
-    # employment: str
+    employment: str
 
     @classmethod
     def data_to_vacancy(cls, data: any) -> "Vacancy":
@@ -91,7 +90,9 @@ class Vacancy:
             employer_name=data["employer"]["name"],
             is_accredited_it_employer=data["employer"]["accredited_it_employer"] if "accredited_it_employer" in data[
                 "employer"] else None,
+            schedule=data["schedule"]["name"],
             experience=data["experience"]["name"],
+            employment=data["employment"]["name"],
         )
 
     def to_list(self) -> list:
@@ -112,7 +113,9 @@ class Vacancy:
             self.url,
             self.employer_name,
             self.is_accredited_it_employer if self.is_accredited_it_employer else "None",
+            self.schedule,
             self.experience,
+            self.employment,
         ]
 
 
@@ -139,7 +142,9 @@ class Vacancies:
                 "URL",
                 "Employer name",
                 "Is accredited it employer",
-                "Experience"
+                "Schedule",
+                "Experience",
+                "Employment",
             ]
         ]
         for vacancy in self.vacancies:

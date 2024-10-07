@@ -147,12 +147,16 @@ class Vacancies:
                 "Is accredited it employer",
                 "Schedule",
                 "Experience",
-                "Employment",
-                "Skills"
+                "Employment"
             ]
         ]
         for vacancy in self.vacancies:
             table.append(vacancy.to_list())
+
+        rows_length: list[int] = [len(it) for it in table]
+        max_length: int = max(rows_length)
+        for it in range(max_length - len(table[0])):
+            table[0].append(f"Skill {it + 1}")
 
         with open(
                 f"export_{vacancies_query.search}_{vacancies_query.areas}_{vacancies_query.roles}.csv",

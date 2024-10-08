@@ -57,8 +57,9 @@ class VacanciesQuery(Query):
     BASE_URL: str = "https://api.hh.ru/vacancies/"
 
     def get_url(self) -> str:
-        vacancy_query_dict: dict[any, any] = super().get_query("roles")
-        vacancy_query_dict.update({"text": ""})
+        vacancy_query_dict: dict[any, any] = super().get_query()
+        vacancy_query_dict.update({"order_by": "relevance"})
+        vacancy_query_dict.update({"search_period": 0})
         vacancy_query_dict.update({"per_page": 100})
         return f"{self.BASE_URL}?{urlencode(vacancy_query_dict, doseq=True)}"
 

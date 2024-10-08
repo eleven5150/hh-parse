@@ -43,7 +43,7 @@ class ResumesQuery(Query):
         resumes_query_dict.update({"filter_exp_period": "all_time"})
         resumes_query_dict.update({"relocation": "living"})
         resumes_query_dict.update({"gender": "unknown"})
-        resumes_query_dict.update(super().get_query("professional_role"))
+        resumes_query_dict.update(super().get_query())
         if page_num != 0:
             resumes_query_dict.update({"page": page_num})
         return f"{self.BASE_URL}?{urlencode(resumes_query_dict, doseq=True)}"
@@ -131,6 +131,9 @@ def resumes_subparser(subparser):
     parser.add_argument("-n", "--num_of_pages",
                         type=int,
                         help="Num of pages to parse")
+    parser.add_argument("-s", "--search_query",
+                        type=str,
+                        help="Search query")
     parser.add_argument("-a", "--areas",
                         type=str,
                         nargs="+",

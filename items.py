@@ -11,6 +11,7 @@ class Items:
     items: list[HhObject]
 
     def to_csv(self, query: Query, table: list[list[str]]) -> None:
+        print("Exporting to csv")
         for item in self.items:
             table.append(item.to_list())
 

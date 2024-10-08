@@ -154,17 +154,20 @@ class Vacancies(Items):
 
 def tool_entrypoint(args: argparse.Namespace) -> None:
     vacancies_query: VacanciesQuery = VacanciesQuery.args_to_vacancy_query(args)
-    vacancy_query_url: str = vacancies_query.get_url()
-    num_of_pages: int = json.loads(requests.get(vacancy_query_url).text)["pages"]
+    vacancies_query_url: str = vacancies_query.get_url()
+    print(f"Vacancies query URL: {vacancies_query_url}")
+    num_of_pages: int = json.loads(requests.get(vacancies_query_url).text)["pages"]
 
     vacancies_list: list[Vacancy] = list()
     for page_num in range(0, num_of_pages + 1):
-        page_data: any = json.loads(requests.get(vacancy_query_url, {"page": page_num}).text)
+        page_data: any = json.loads(requests.get(vacancies_query_url, {"page": page_num}).text)
         if "items" in page_data:
             for raw_vacancy_short in page_data["items"]:
+                vacancy_query_url: str = f"{vacancies_query.BASE_URL}{raw_vacancy_short['id']}"
+                print(f"Vacancy query URL: {vacancies_query_url}")
                 raw_vacancy_full: any = json.loads(
                     requests.get(
-                        f"{vacancies_query.BASE_URL}{raw_vacancy_short['id']}"
+                        vacancy_query_url
                     ).text
                 )
                 if "id" in raw_vacancy_full:  # TODO: fix captcha

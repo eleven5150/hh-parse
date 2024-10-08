@@ -148,13 +148,14 @@ def tool_entrypoint(args: argparse.Namespace) -> None:
     resumes_list: list[Resume] = list()
     for page_num in range(0, args.num_of_pages):
         query_url: str = resumes_query.get_url(page_num)
-        print(query_url)
+        print(f"Resumes page URL: {query_url}")
         resumes_page_data: str = requests.get(query_url, headers=REQUEST_HEADERS).text
         resumes_page_soup: BeautifulSoup = BeautifulSoup(resumes_page_data, features="lxml", from_encoding="utf-8")
         tags_with_link: ResultSet = resumes_page_soup.find_all("a", {"data-qa": "serp-item__title"})
         for tag in tags_with_link:
             resume_id: str = RE_COMPILED.search(tag["href"]).group(1).strip()
             resume_url: str = f"{RESUME_URL}{resume_id}"
+            print("Resume URL:", resume_url)
             resume_page_data: str = requests.get(resume_url, headers=REQUEST_HEADERS).text
             resume_page_soup: BeautifulSoup = BeautifulSoup(resume_page_data, features="lxml", from_encoding="utf-8")
             resumes_list.append(Resume.html_to_resume(resume_id, resume_page_soup))

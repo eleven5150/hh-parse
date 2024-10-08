@@ -1,13 +1,13 @@
 import argparse
-import csv
 import re
-from _csv import writer
 from dataclasses import dataclass
 from urllib.parse import urlencode
 
 import requests
 from bs4 import BeautifulSoup, ResultSet
 
+from hh_object import HhObject
+from items import Items
 from query import Query
 
 RE_COMPILED: re.Pattern[str] = re.compile(r"resume\/(.+)\?")
@@ -18,6 +18,18 @@ REQUEST_HEADERS: dict[str, str] = {
     "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
 }
+
+RESUMES_TABLE_HEADER: list[list[str]] = [
+    [
+        "ID",
+        "Title",
+        "Area",
+        "Age",
+        "Gender",
+        "Salary",
+        "Experience (Months)",
+    ]
+]
 
 
 @dataclass
@@ -31,23 +43,20 @@ class ResumesQuery(Query):
         resumes_query_dict.update({"filter_exp_period": "all_time"})
         resumes_query_dict.update({"relocation": "living"})
         resumes_query_dict.update({"gender": "unknown"})
-        resumes_query_dict.update({"area": self.areas})
-        resumes_query_dict.update({"professional_role": self.roles})
+        resumes_query_dict.update(super().get_query("professional_role"))
         if page_num != 0:
             resumes_query_dict.update({"page": page_num})
         return f"{self.BASE_URL}?{urlencode(resumes_query_dict, doseq=True)}"
 
 
 @dataclass
-class Resume:
+class Resume(HhObject):
     id: str
     title: str
-    area: str
     age: int | None
     gender: str
     salary: int | None
     experience: int
-    skills: list[str]
 
     @classmethod
     def html_to_resume(cls, resume_id: str, resume_page_soup: BeautifulSoup) -> "Resume":
@@ -99,7 +108,7 @@ class Resume:
             skills=skills,
         )
 
-    def to_list(self) -> list:
+    def to_list(self) -> list[any]:
         return [
             self.id,
             self.title,
@@ -113,49 +122,17 @@ class Resume:
 
 
 @dataclass
-class Resumes:
-    resumes: list[Resume]
-
-    def to_csv(self, resumes_query: ResumesQuery) -> None:
-        table: list[list[str]] = [
-            [
-                "ID",
-                "Title",
-                "Area",
-                "Age",
-                "Gender",
-                "Salary",
-                "Experience (Months)",
-            ]
-        ]
-
-        for resume in self.resumes:
-            table.append(resume.to_list())
-
-        rows_length: list[int] = [len(it) for it in table]
-        max_length: int = max(rows_length)
-        for it in range(max_length - len(table[0])):
-            table[0].append(f"Skill {it + 1}")
-
-        with open(
-                f"export_resumes_{resumes_query.areas}_{resumes_query.roles}.csv",
-                "w",
-                encoding="utf-8",
-                newline=""
-        ) as csv_file:
-            csv_writer: writer = csv.writer(csv_file)
-            csv_writer.writerows(table)
+class Resumes(Items):
+    items: list[Resume]
 
 
 def resumes_subparser(subparser):
     parser = subparser.add_parser("resumes_tool", description="Tool for parsing resumes")
     parser.add_argument("-n", "--num_of_pages",
                         type=int,
-                        required=True,
                         help="Num of pages to parse")
     parser.add_argument("-a", "--areas",
                         type=str,
-                        required=True,
                         nargs="+",
                         help="Area for search")
     parser.add_argument("-r", "--roles",
@@ -183,4 +160,4 @@ def tool_entrypoint(args: argparse.Namespace) -> None:
             resumes_list.append(Resume.html_to_resume(resume_id, resume_page_soup))
 
     vacancies: Resumes = Resumes(resumes_list)
-    vacancies.to_csv(resumes_query)
+    vacancies.to_csv(resumes_query, RESUMES_TABLE_HEADER)

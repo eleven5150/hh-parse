@@ -1,25 +1,47 @@
 import argparse
-import csv
 import json
 import requests
 
-from _csv import writer
 from dataclasses import dataclass
 from datetime import datetime
 from urllib.parse import urlencode
 
+from hh_object import HhObject
+from items import Items
 from query import Query
+
+VACANCIES_TABLE_HEADER: list[list[str]] = [
+    [
+        "ID",
+        "Is Premium",
+        "Name",
+        "Department",
+        "Has test",
+        "Is response letter required",
+        "Area",
+        "Salary from",
+        "Salary to",
+        "Type",
+        "Created at",
+        "Updated at",
+        "Is archived",
+        "URL",
+        "Employer name",
+        "Is accredited it employer",
+        "Schedule",
+        "Experience",
+        "Employment"
+    ]
+]
 
 
 def vacancies_subparser(subparser):
     parser = subparser.add_parser("vacancies_tool", description="Tool for parsing vacancies")
     parser.add_argument("-s", "--search_query",
                         type=str,
-                        required=True,
                         help="Search query")
     parser.add_argument("-a", "--areas",
                         type=str,
-                        required=True,
                         nargs="+",
                         help="Area for search")
     parser.add_argument("-r", "--roles",
@@ -35,21 +57,20 @@ class VacanciesQuery(Query):
     BASE_URL: str = "https://api.hh.ru/vacancies/"
 
     def get_url(self) -> str:
-        vacancy_query_dict: dict[any, any] = super().get_query()
+        vacancy_query_dict: dict[any, any] = super().get_query("roles")
         vacancy_query_dict.update({"text": ""})
         vacancy_query_dict.update({"per_page": 100})
         return f"{self.BASE_URL}?{urlencode(vacancy_query_dict, doseq=True)}"
 
 
 @dataclass
-class Vacancy:
+class Vacancy(HhObject):
     id: int
     is_premium: bool
     name: str
     department: str | None
     has_test: bool
     is_response_letter_required: bool
-    area: str
     salary_from: int | None
     salary_to: int | None
     type: str
@@ -62,7 +83,6 @@ class Vacancy:
     schedule: str
     experience: str
     employment: str
-    skills: list[str]
 
     @classmethod
     def data_to_vacancy(cls, data: any) -> "Vacancy":
@@ -102,7 +122,7 @@ class Vacancy:
             skills=[it["name"] for it in data["key_skills"]] if data["key_skills"] else [None],
         )
 
-    def to_list(self) -> list:
+    def to_list(self) -> list[any]:
         return [
             self.id,
             self.is_premium,
@@ -128,49 +148,8 @@ class Vacancy:
 
 
 @dataclass
-class Vacancies:
-    vacancies: list[Vacancy]
-
-    def to_csv(self, vacancies_query: VacanciesQuery) -> None:
-        table: list[list[str]] = [
-            [
-                "ID",
-                "Is Premium",
-                "Name",
-                "Department",
-                "Has test",
-                "Is response letter required",
-                "Area",
-                "Salary from",
-                "Salary to",
-                "Type",
-                "Created at",
-                "Updated at",
-                "Is archived",
-                "URL",
-                "Employer name",
-                "Is accredited it employer",
-                "Schedule",
-                "Experience",
-                "Employment"
-            ]
-        ]
-        for vacancy in self.vacancies:
-            table.append(vacancy.to_list())
-
-        rows_length: list[int] = [len(it) for it in table]
-        max_length: int = max(rows_length)
-        for it in range(max_length - len(table[0])):
-            table[0].append(f"Skill {it + 1}")
-
-        with open(
-                f"export_vacancies_{vacancies_query.areas}_{vacancies_query.roles}.csv",
-                "w",
-                encoding="utf-8",
-                newline=""
-        ) as csv_file:
-            csv_writer: writer = csv.writer(csv_file)
-            csv_writer.writerows(table)
+class Vacancies(Items):
+    items: list[Vacancy]
 
 
 def tool_entrypoint(args: argparse.Namespace) -> None:
@@ -192,4 +171,4 @@ def tool_entrypoint(args: argparse.Namespace) -> None:
                     vacancies_list.append(Vacancy.data_to_vacancy(raw_vacancy_full))
 
     vacancies: Vacancies = Vacancies(vacancies_list)
-    vacancies.to_csv(vacancies_query)
+    vacancies.to_csv(vacancies_query, VACANCIES_TABLE_HEADER)

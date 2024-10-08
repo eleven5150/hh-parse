@@ -18,8 +18,8 @@ class Query:
             roles=roles
         )
 
-    def get_query(self) -> dict[any, any]:
+    def get_query(self, roles_name: str) -> dict[any, any]:
         query_dict: dict[any, any] = dict()
         query_dict.update({"area": self.areas})
-        query_dict.update({"roles": self.roles})
+        query_dict.update({roles_name: self.roles})
         return query_dict

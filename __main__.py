@@ -23,7 +23,7 @@ def parse_args(arguments: list):
 
 def main(raw_arguments: list) -> None:
     args = parse_args(raw_arguments[1:])
-
+    print(f"Starting {args.tool}")
     args.func(args)
 
 
